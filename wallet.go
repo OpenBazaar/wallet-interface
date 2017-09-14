@@ -6,6 +6,7 @@ import (
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
 	"time"
+	"errors"
 )
 
 type Wallet interface {
@@ -69,6 +70,9 @@ type Wallet interface {
 
 	// Calculates the estimated size of the transaction and returns the total fee for the given feePerByte
 	EstimateFee(ins []TransactionInput, outs []TransactionOutput, feePerByte uint64) uint64
+
+	// Build a spend transaction for the amount and return the transaction fee
+	EstimateSpendFee(amount int64, feeLevel FeeLevel) (uint64, error)
 
 	// Build and broadcast a transaction that sweeps all coins from an address. If it is a p2sh multisig, the redeemScript must be included
 	SweepAddress(utxos []Utxo, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
@@ -162,3 +166,10 @@ type Signature struct {
 	InputIndex uint32
 	Signature  []byte
 }
+
+// Errors
+var (
+	ErrorInsuffientFunds error = errors.New("Insuffient funds")
+	ErrorDustAmount      error = errors.New("Amount is below network dust treshold")
+)
+

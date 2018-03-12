@@ -8,6 +8,30 @@ import (
 	"time"
 )
 
+type CoinType uint32
+
+const (
+	Bitcoin     CoinType = 0
+	Litecoin             = 1
+	Zcash                = 133
+	BitcoinCash CoinType = 145
+)
+
+func (c *CoinType) String() string {
+	switch *c {
+	case Bitcoin:
+		return "Bitcoin"
+	case BitcoinCash:
+		return "Bitcoin Cash"
+	case Zcash:
+		return "Zcash"
+	case Litecoin:
+		return "Litecoin"
+	default:
+		return ""
+	}
+}
+
 type Datastore interface {
 	Utxos() Utxos
 	Stxos() Stxos

@@ -67,10 +67,10 @@ type Stxos interface {
 
 type Txns interface {
 	// Put a new transaction to the database
-	Put(txn *wire.MsgTx, value, height int, timestamp time.Time, watchOnly bool) error
+	Put(raw []byte, txid string, value, height int, timestamp time.Time, watchOnly bool) error
 
-	// Fetch a raw tx and it's metadata given a hash
-	Get(txid chainhash.Hash) (*wire.MsgTx, Txn, error)
+	// Fetch a tx and it's metadata given a hash
+	Get(txid chainhash.Hash) (Txn, error)
 
 	// Fetch all transactions from the db
 	GetAll(includeWatchOnly bool) ([]Txn, error)

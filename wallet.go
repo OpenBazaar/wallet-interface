@@ -2,20 +2,36 @@ package wallet
 
 import (
 	"errors"
-	"github.com/btcsuite/btcd/chaincfg"
+	"time"
+
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
-	"time"
 )
 
+// WalletAddress is a coin agnostic subset
+// of the btc.Address interface.
+// The only method not included is
+// IsForNet(*chaincfg.Params) bool
+// which is coin agnostic
+type WalletAddress interface {
+	String() string
+	EncodeAddress() string
+	ScriptAddress() []byte
+}
+
+// Wallet is the interface that each coin usable
+// on OpenBazaar must implement
 type Wallet interface {
 
 	// Start the wallet
 	Start()
 
 	// Return the network parameters
-	Params() *chaincfg.Params
+	// This method is not required as a part of the interface
+	// because params is embedded inside the BTC coin family
+	// wallet implementation
+	// Params() *chaincfg.Params
 
 	// Returns the type of crytocurrency this wallet implements
 	CurrencyCode() string
@@ -30,7 +46,7 @@ type Wallet interface {
 	MasterPublicKey() *hd.ExtendedKey
 
 	// Get the current address for the given purpose
-	CurrentAddress(purpose KeyPurpose) btc.Address
+	CurrentAddress(purpose KeyPurpose) WalletAddress
 
 	// Returns a fresh address that has never been returned by this function
 	NewAddress(purpose KeyPurpose) btc.Address
@@ -130,16 +146,16 @@ type TransactionCallback struct {
 }
 
 type TransactionOutput struct {
-	Address      btc.Address
-	Value        int64
-	Index        uint32
+	Address btc.Address
+	Value   int64
+	Index   uint32
 }
 
 type TransactionInput struct {
-	OutpointHash       []byte
-	OutpointIndex      uint32
-	Address            btc.Address
-	Value              int64
+	OutpointHash  []byte
+	OutpointIndex uint32
+	Address       btc.Address
+	Value         int64
 }
 
 // OpenBazaar uses p2sh addresses for escrow. This object can be used to store a record of a
@@ -147,12 +163,12 @@ type TransactionInput struct {
 // value and be market as spent when the UXTO is spent. Outgoing transactions should have a
 // negative value. The spent field isn't relevant for outgoing transactions.
 type TransactionRecord struct {
-	Txid         string
-	Index        uint32
-	Value        int64
-	Address      string
-	Spent        bool
-	Timestamp    time.Time
+	Txid      string
+	Index     uint32
+	Value     int64
+	Address   string
+	Spent     bool
+	Timestamp time.Time
 }
 
 // This object contains a single signature for a multisig transaction. InputIndex specifies

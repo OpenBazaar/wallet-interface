@@ -49,13 +49,13 @@ type Wallet interface {
 	CurrentAddress(purpose KeyPurpose) WalletAddress
 
 	// Returns a fresh address that has never been returned by this function
-	NewAddress(purpose KeyPurpose) btc.Address
+	NewAddress(purpose KeyPurpose) WalletAddress
 
 	// Parse the address string and return an address interface
-	DecodeAddress(addr string) (btc.Address, error)
+	DecodeAddress(addr string) (WalletAddress, error)
 
 	// Returns if the wallet has the key for the given address
-	HasKey(addr btc.Address) bool
+	HasKey(addr WalletAddress) bool
 
 	// Get the confirmed and unconfirmed balances
 	Balance() (confirmed, unconfirmed int64)
@@ -73,7 +73,7 @@ type Wallet interface {
 	GetFeePerByte(feeLevel FeeLevel) uint64
 
 	// Send bitcoins to an external wallet
-	Spend(amount int64, addr btc.Address, feeLevel FeeLevel) (*chainhash.Hash, error)
+	Spend(amount int64, addr WalletAddress, feeLevel FeeLevel) (*chainhash.Hash, error)
 
 	// Bump the fee for the given transaction
 	BumpFee(txid chainhash.Hash) (*chainhash.Hash, error)
@@ -85,7 +85,7 @@ type Wallet interface {
 	EstimateSpendFee(amount int64, feeLevel FeeLevel) (uint64, error)
 
 	// Build and broadcast a transaction that sweeps all coins from an address. If it is a p2sh multisig, the redeemScript must be included
-	SweepAddress(utxos []Utxo, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
+	SweepAddress(utxos []Utxo, address *WalletAddress, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
 
 	// Create a signature for a multisig transaction
 	CreateMultisigSignature(ins []TransactionInput, outs []TransactionOutput, key *hd.ExtendedKey, redeemScript []byte, feePerByte uint64) ([]Signature, error)
@@ -97,7 +97,7 @@ type Wallet interface {
 	GenerateMultisigScript(keys []hd.ExtendedKey, threshold int, timeout time.Duration, timeoutKey *hd.ExtendedKey) (addr btc.Address, redeemScript []byte, err error)
 
 	// Add a script to the wallet and get notifications back when coins are received or spent from it
-	AddWatchedAddress(address btc.Address) error
+	AddWatchedAddress(address WalletAddress) error
 
 	// Add a callback for incoming transactions
 	AddTransactionListener(func(TransactionCallback))
@@ -146,16 +146,18 @@ type TransactionCallback struct {
 }
 
 type TransactionOutput struct {
-	Address btc.Address
-	Value   int64
-	Index   uint32
+	Address      WalletAddress
+	ScriptPubKey []byte
+	Value        int64
+	Index        uint32
 }
 
 type TransactionInput struct {
-	OutpointHash  []byte
-	OutpointIndex uint32
-	Address       btc.Address
-	Value         int64
+	OutpointHash       []byte
+	OutpointIndex      uint32
+	Address            WalletAddress
+	LinkedScriptPubKey []byte
+	Value              int64
 }
 
 // OpenBazaar uses p2sh addresses for escrow. This object can be used to store a record of a

@@ -2,10 +2,11 @@ package wallet
 
 import (
 	"bytes"
+	"time"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"time"
 )
 
 type CoinType uint32
@@ -15,6 +16,7 @@ const (
 	Litecoin             = 1
 	Zcash                = 133
 	BitcoinCash CoinType = 145
+	Ethereum    CoinType = 88
 )
 
 func (c *CoinType) String() string {
@@ -27,6 +29,8 @@ func (c *CoinType) String() string {
 		return "Zcash"
 	case Litecoin:
 		return "Litecoin"
+	case Ethereum:
+		return "Ethereum"
 	default:
 		return ""
 	}

@@ -19,7 +19,8 @@ const (
 	Bitcoin     CoinType = 0
 	Litecoin             = 1
 	Zcash                = 133
-	BitcoinCash CoinType = 145
+	BitcoinCash          = 145
+	Ethereum             = 60
 )
 
 func (c *CoinType) String() string {
@@ -32,6 +33,8 @@ func (c *CoinType) String() string {
 		return "Zcash"
 	case Litecoin:
 		return "Litecoin"
+	case Ethereum:
+		return "Ethereum"
 	default:
 		return ""
 	}
@@ -47,6 +50,8 @@ func (c *CoinType) CurrencyCode() string {
 		return "ZEC"
 	case Litecoin:
 		return "LTC"
+	case Ethereum:
+		return "ETH"
 	default:
 		return ""
 	}

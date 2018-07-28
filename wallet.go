@@ -38,12 +38,6 @@ type Wallet interface {
 	// Parse the address string and return an address interface
 	DecodeAddress(addr string) (btc.Address, error)
 
-	// Turn the given output script into an address
-	ScriptToAddress(script []byte) (btc.Address, error)
-
-	// Turn the given address into an output script
-	AddressToScript(addr btc.Address) ([]byte, error)
-
 	// Returns if the wallet has the key for the given address
 	HasKey(addr btc.Address) bool
 
@@ -86,8 +80,8 @@ type Wallet interface {
 	// Generate a multisig script from public keys. If a timeout is included the returned script should be a timelocked escrow which releases using the timeoutKey.
 	GenerateMultisigScript(keys []hd.ExtendedKey, threshold int, timeout time.Duration, timeoutKey *hd.ExtendedKey) (addr btc.Address, redeemScript []byte, err error)
 
-	// Add a script to the wallet and get notifications back when coins are received or spent from it
-	AddWatchedScript(script []byte) error
+	// Add an address to the wallet and get notifications back when coins are received or spent from it
+	AddWatchedAddress(addr btc.Address) error
 
 	// Add a callback for incoming transactions
 	AddTransactionListener(func(TransactionCallback))
@@ -136,7 +130,7 @@ type TransactionCallback struct {
 }
 
 type TransactionOutput struct {
-	ScriptPubKey []byte
+	Address      btc.Address
 	Value        int64
 	Index        uint32
 }
@@ -144,7 +138,7 @@ type TransactionOutput struct {
 type TransactionInput struct {
 	OutpointHash       []byte
 	OutpointIndex      uint32
-	LinkedScriptPubKey []byte
+	LinkedAddress      btc.Address
 	Value              int64
 }
 
@@ -156,7 +150,7 @@ type TransactionRecord struct {
 	Txid         string
 	Index        uint32
 	Value        int64
-	ScriptPubKey string
+	Address      string
 	Spent        bool
 	Timestamp    time.Time
 }

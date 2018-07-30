@@ -29,6 +29,10 @@ type Wallet interface {
 	// Get the master public key
 	MasterPublicKey() *hd.ExtendedKey
 
+	// Generate a child key using the given chaincode. The key is used in multisig transactions.
+	// For most implementations this should just be child key 0.
+	ChildKey(chaincode []byte) (*hd.ExtendedKey, error)
+
 	// Get the current address for the given purpose
 	CurrentAddress(purpose KeyPurpose) btc.Address
 
@@ -71,8 +75,8 @@ type Wallet interface {
 	// Build and broadcast a transaction that sweeps all coins from an address. If it is a p2sh multisig, the redeemScript must be included
 	SweepAddress(utxos []Utxo, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
 
-	// Create a signature for a multisig transaction. The wallet is responsible for deriving child keys if required.
-	CreateMultisigSignature(ins []TransactionInput, outs []TransactionOutput, masterKey *hd.ExtendedKey, chaincode []byte, redeemScript []byte, feePerByte uint64) ([]Signature, error)
+	// Create a signature for a multisig transaction.
+	CreateMultisigSignature(ins []TransactionInput, outs []TransactionOutput, key *hd.ExtendedKey, redeemScript []byte, feePerByte uint64) ([]Signature, error)
 
 	// Combine signatures and optionally broadcast
 	Multisign(ins []TransactionInput, outs []TransactionOutput, sigs1 []Signature, sigs2 []Signature, redeemScript []byte, feePerByte uint64, broadcast bool) ([]byte, error)

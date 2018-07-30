@@ -1,11 +1,11 @@
 package wallet
 
 import (
-	"bytes"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"time"
+	"github.com/btcsuite/btcutil"
 )
 
 type Coin interface {
@@ -164,8 +164,8 @@ type Utxo struct {
 	// The higher the better
 	Value int64
 
-	// Output script
-	ScriptPubkey []byte
+	// Output address
+	Address btcutil.Address
 
 	// If true this utxo will not be selected for spending. The primary
 	// purpose is track multisig UTXOs which must have separate handling
@@ -194,7 +194,7 @@ func (utxo *Utxo) IsEqual(alt *Utxo) bool {
 		return false
 	}
 
-	if bytes.Compare(utxo.ScriptPubkey, alt.ScriptPubkey) != 0 {
+	if utxo.Address.String() != alt.Address.String() {
 		return false
 	}
 

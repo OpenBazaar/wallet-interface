@@ -9,14 +9,19 @@ import (
 	"github.com/btcsuite/btcd/wire"
 )
 
+type Coin interface {
+	String() string
+	CurrencyCode() string
+}
+
 type CoinType uint32
 
 const (
 	Bitcoin     CoinType = 0
 	Litecoin             = 1
 	Zcash                = 133
-	BitcoinCash CoinType = 145
-	Ethereum    CoinType = 88
+	BitcoinCash          = 145
+	Ethereum             = 60
 )
 
 func (c *CoinType) String() string {
@@ -31,6 +36,23 @@ func (c *CoinType) String() string {
 		return "Litecoin"
 	case Ethereum:
 		return "Ethereum"
+	default:
+		return ""
+	}
+}
+
+func (c *CoinType) CurrencyCode() string {
+	switch *c {
+	case Bitcoin:
+		return "BTC"
+	case BitcoinCash:
+		return "BCH"
+	case Zcash:
+		return "ZEC"
+	case Litecoin:
+		return "LTC"
+	case Ethereum:
+		return "ETH"
 	default:
 		return ""
 	}

@@ -45,6 +45,10 @@ type Wallet interface {
 	// Get the master public key
 	MasterPublicKey() *hd.ExtendedKey
 
+	// Generate a child key using the given chaincode. The key is used in multisig transactions.
+	// For most implementations this should just be child key 0.
+	ChildKey(keyBytes []byte, chaincode []byte, isPrivateKey bool) (*hd.ExtendedKey, error)
+
 	// Get the current address for the given purpose
 	CurrentAddress(purpose KeyPurpose) WalletAddress
 
@@ -85,9 +89,9 @@ type Wallet interface {
 	EstimateSpendFee(amount int64, feeLevel FeeLevel) (uint64, error)
 
 	// Build and broadcast a transaction that sweeps all coins from an address. If it is a p2sh multisig, the redeemScript must be included
-	SweepAddress(utxos []Utxo, address *WalletAddress, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
+	SweepAddress(ins []TransactionInput, address *WalletAddress, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
 
-	// Create a signature for a multisig transaction
+	// Create a signature for a multisig transaction.
 	CreateMultisigSignature(ins []TransactionInput, outs []TransactionOutput, key *hd.ExtendedKey, redeemScript []byte, feePerByte uint64) ([]Signature, error)
 
 	// Combine signatures and optionally broadcast
@@ -96,7 +100,7 @@ type Wallet interface {
 	// Generate a multisig script from public keys. If a timeout is included the returned script should be a timelocked escrow which releases using the timeoutKey.
 	GenerateMultisigScript(keys []hd.ExtendedKey, threshold int, timeout time.Duration, timeoutKey *hd.ExtendedKey) (addr btc.Address, redeemScript []byte, err error)
 
-	// Add a script to the wallet and get notifications back when coins are received or spent from it
+	// Add an address to the wallet and get notifications back when coins are received or spent from it
 	AddWatchedAddress(address WalletAddress) error
 
 	// Add a callback for incoming transactions
@@ -135,7 +139,7 @@ const (
 // This callback is passed to any registered transaction listeners when a transaction is detected
 // for the wallet.
 type TransactionCallback struct {
-	Txid      []byte
+	Txid      string
 	Outputs   []TransactionOutput
 	Inputs    []TransactionInput
 	Height    int32
@@ -147,7 +151,6 @@ type TransactionCallback struct {
 
 type TransactionOutput struct {
 	Address      WalletAddress
-	ScriptPubKey []byte
 	Value        int64
 	Index        uint32
 }
@@ -155,8 +158,7 @@ type TransactionOutput struct {
 type TransactionInput struct {
 	OutpointHash       []byte
 	OutpointIndex      uint32
-	Address            WalletAddress
-	LinkedScriptPubKey []byte
+	LinkedAddress      WalletAddress
 	Value              int64
 }
 

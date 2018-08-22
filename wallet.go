@@ -101,7 +101,7 @@ type Wallet interface {
 	GenerateMultisigScript(keys []hd.ExtendedKey, threshold int, timeout time.Duration, timeoutKey *hd.ExtendedKey) (addr btc.Address, redeemScript []byte, err error)
 
 	// Add an address to the wallet and get notifications back when coins are received or spent from it
-	AddWatchedAddress(address WalletAddress) error
+	AddWatchedAddress(addr WalletAddress) error
 
 	// Add a callback for incoming transactions
 	AddTransactionListener(func(TransactionCallback))
@@ -150,16 +150,16 @@ type TransactionCallback struct {
 }
 
 type TransactionOutput struct {
-	Address      WalletAddress
-	Value        int64
-	Index        uint32
+	Address WalletAddress
+	Value   int64
+	Index   uint32
 }
 
 type TransactionInput struct {
-	OutpointHash       []byte
-	OutpointIndex      uint32
-	LinkedAddress      WalletAddress
-	Value              int64
+	OutpointHash  []byte
+	OutpointIndex uint32
+	LinkedAddress WalletAddress
+	Value         int64
 }
 
 // OpenBazaar uses p2sh addresses for escrow. This object can be used to store a record of a

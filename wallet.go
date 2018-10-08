@@ -2,20 +2,36 @@ package wallet
 
 import (
 	"errors"
-	"github.com/btcsuite/btcd/chaincfg"
+	"time"
+
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
-	"time"
 )
 
+// WalletAddress is a coin agnostic subset
+// of the btc.Address interface.
+// The only method not included is
+// IsForNet(*chaincfg.Params) bool
+// which is coin agnostic
+type WalletAddress interface {
+	String() string
+	EncodeAddress() string
+	ScriptAddress() []byte
+}
+
+// Wallet is the interface that each coin usable
+// on OpenBazaar must implement
 type Wallet interface {
 
 	// Start the wallet
 	Start()
 
 	// Return the network parameters
-	Params() *chaincfg.Params
+	// This method is not required as a part of the interface
+	// because params is embedded inside the BTC coin family
+	// wallet implementation
+	// Params() *chaincfg.Params
 
 	// Returns the type of crytocurrency this wallet implements
 	CurrencyCode() string
@@ -34,19 +50,16 @@ type Wallet interface {
 	ChildKey(keyBytes []byte, chaincode []byte, isPrivateKey bool) (*hd.ExtendedKey, error)
 
 	// Get the current address for the given purpose
-	CurrentAddress(purpose KeyPurpose) btc.Address
+	CurrentAddress(purpose KeyPurpose) WalletAddress
 
 	// Returns a fresh address that has never been returned by this function
-	NewAddress(purpose KeyPurpose) btc.Address
+	NewAddress(purpose KeyPurpose) WalletAddress
 
 	// Parse the address string and return an address interface
-	DecodeAddress(addr string) (btc.Address, error)
-
-	// Turn the given output script into an address
-	ScriptToAddress(script []byte) (btc.Address, error)
+	DecodeAddress(addr string) (WalletAddress, error)
 
 	// Returns if the wallet has the key for the given address
-	HasKey(addr btc.Address) bool
+	HasKey(addr WalletAddress) bool
 
 	// Get the confirmed and unconfirmed balances
 	Balance() (confirmed, unconfirmed int64)
@@ -64,7 +77,7 @@ type Wallet interface {
 	GetFeePerByte(feeLevel FeeLevel) uint64
 
 	// Send bitcoins to an external wallet
-	Spend(amount int64, addr btc.Address, feeLevel FeeLevel) (*chainhash.Hash, error)
+	Spend(amount int64, addr WalletAddress, feeLevel FeeLevel) (*chainhash.Hash, error)
 
 	// Bump the fee for the given transaction
 	BumpFee(txid chainhash.Hash) (*chainhash.Hash, error)
@@ -76,7 +89,7 @@ type Wallet interface {
 	EstimateSpendFee(amount int64, feeLevel FeeLevel) (uint64, error)
 
 	// Build and broadcast a transaction that sweeps all coins from an address. If it is a p2sh multisig, the redeemScript must be included
-	SweepAddress(ins []TransactionInput, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
+	SweepAddress(ins []TransactionInput, address *WalletAddress, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
 
 	// Create a signature for a multisig transaction.
 	CreateMultisigSignature(ins []TransactionInput, outs []TransactionOutput, key *hd.ExtendedKey, redeemScript []byte, feePerByte uint64) ([]Signature, error)
@@ -88,7 +101,7 @@ type Wallet interface {
 	GenerateMultisigScript(keys []hd.ExtendedKey, threshold int, timeout time.Duration, timeoutKey *hd.ExtendedKey) (addr btc.Address, redeemScript []byte, err error)
 
 	// Add an address to the wallet and get notifications back when coins are received or spent from it
-	AddWatchedAddress(addr btc.Address) error
+	AddWatchedAddress(addr WalletAddress) error
 
 	// Add a callback for incoming transactions
 	AddTransactionListener(func(TransactionCallback))
@@ -137,7 +150,7 @@ type TransactionCallback struct {
 }
 
 type TransactionOutput struct {
-	Address btc.Address
+	Address WalletAddress
 	Value   int64
 	Index   uint32
 }
@@ -145,7 +158,7 @@ type TransactionOutput struct {
 type TransactionInput struct {
 	OutpointHash  []byte
 	OutpointIndex uint32
-	LinkedAddress btc.Address
+	LinkedAddress WalletAddress
 	Value         int64
 }
 

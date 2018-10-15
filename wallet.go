@@ -2,11 +2,12 @@ package wallet
 
 import (
 	"errors"
+	"time"
+
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
-	"time"
 )
 
 type Wallet interface {
@@ -134,6 +135,7 @@ type TransactionCallback struct {
 	Value     int64
 	WatchOnly bool
 	BlockTime time.Time
+	OrderID   string
 }
 
 type TransactionOutput struct {

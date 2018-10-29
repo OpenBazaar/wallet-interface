@@ -135,13 +135,13 @@ type TransactionCallback struct {
 	Value     int64
 	WatchOnly bool
 	BlockTime time.Time
-	OrderID   string
 }
 
 type TransactionOutput struct {
 	Address btc.Address
 	Value   int64
 	Index   uint32
+	OrderID string
 }
 
 type TransactionInput struct {
@@ -149,6 +149,7 @@ type TransactionInput struct {
 	OutpointIndex uint32
 	LinkedAddress btc.Address
 	Value         int64
+	OrderID       string
 }
 
 // OpenBazaar uses p2sh addresses for escrow. This object can be used to store a record of a

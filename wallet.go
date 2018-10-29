@@ -2,10 +2,12 @@ package wallet
 
 import (
 	"errors"
+	"time"
+
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
-	"time"
 )
 
 // The Wallet interface is used by openbazaar-go for both normal wallet operation (sending
@@ -280,6 +282,7 @@ type TransactionOutput struct {
 	Address btc.Address
 	Value   int64
 	Index   uint32
+	OrderID string
 }
 
 type TransactionInput struct {
@@ -287,6 +290,7 @@ type TransactionInput struct {
 	OutpointIndex uint32
 	LinkedAddress btc.Address
 	Value         int64
+	OrderID       string
 }
 
 // OpenBazaar uses p2sh addresses for escrow. This object can be used to store a record of a

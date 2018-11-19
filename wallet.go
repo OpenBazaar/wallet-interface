@@ -128,7 +128,8 @@ type Wallet interface {
 	// this method in two places. 1) When the user requests a normal transfer from their
 	// wallet to another address. 2) When clicking 'pay from internal wallet' to fund
 	// an order the user just placed.
-	Spend(amount int64, addr btc.Address, feeLevel FeeLevel) (*chainhash.Hash, error)
+	// It also includes a referenceID which basically refers to the order the spend will affect
+	Spend(amount int64, addr btc.Address, feeLevel FeeLevel, referenceID string) (*chainhash.Hash, error)
 
 	// BumpFee should attempt to bump the fee on a given unconfirmed transaction (if possible) to
 	// try to get it confirmed and return the txid of the new transaction (if one exists).

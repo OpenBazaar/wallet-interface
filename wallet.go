@@ -129,7 +129,11 @@ type Wallet interface {
 	// wallet to another address. 2) When clicking 'pay from internal wallet' to fund
 	// an order the user just placed.
 	// It also includes a referenceID which basically refers to the order the spend will affect
-	Spend(amount int64, addr btc.Address, feeLevel FeeLevel, referenceID string) (*chainhash.Hash, error)
+	//
+	// IF sendAll is true then `amount` will be ignored and the full balance of the wallet should
+	// be swept to the destination address. Any transaction should be deducted from the amount
+	// being set rather than added to it.
+	Spend(amount int64, addr btc.Address, feeLevel FeeLevel, referenceID string, sendAll bool) (*chainhash.Hash, error)
 
 	// BumpFee should attempt to bump the fee on a given unconfirmed transaction (if possible) to
 	// try to get it confirmed and return the txid of the new transaction (if one exists).

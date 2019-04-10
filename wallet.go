@@ -227,7 +227,12 @@ type walletMustBanker interface {
 	// wallet to another address. 2) When clicking 'pay from internal wallet' to fund
 	// an order the user just placed.
 	// It also includes a referenceID which basically refers to the order the spend will affect
-	Spend(amount int64, addr btc.Address, feeLevel FeeLevel, referenceID string) (*chainhash.Hash, error)
+	//
+	// If spendAll is true the amount field will be ignored and all the funds in the wallet will
+	// be swept to the provided payment address. For most coins this entails subtracting the
+	// transaction fee from the total amount being sent rather than adding it on as is normally
+	// the case when spendAll is false.
+	Spend(amount int64, addr btc.Address, feeLevel FeeLevel, referenceID string, spendAll bool) (*chainhash.Hash, error)
 
 	// EstimateFee should return the estimate fee that will be required to make a transaction
 	// spending from the given inputs to the given outputs. FeePerByte is denominated in

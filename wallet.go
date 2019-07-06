@@ -213,6 +213,7 @@ type walletMustKeysmither interface {
 	// This method is called by openbazaar-go by whichever party to the escrow is trying to release the funds only after
 	// all needed parties have signed using `CreateMultisigSignature` and have shared their signatures with each other.
 	Multisign(ins []TransactionInput, outs []TransactionOutput, sigs1 []Signature, sigs2 []Signature, redeemScript []byte, feePerByte big.Int, broadcast bool) ([]byte, error)
+}
 
 type walletMustBanker interface {
 	// GetFeePerByte returns the current fee per byte for the given fee level. There

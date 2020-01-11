@@ -173,6 +173,10 @@ type Keys interface {
 }
 
 type WatchedScripts interface {
+
+	// Add scripts to watch
+	PutAll(scriptPubkeys [][]byte) error
+
 	// Add a script to watch
 	Put(scriptPubKey []byte) error
 
@@ -294,6 +298,8 @@ type Txn struct {
 
 	FromAddress string
 	ToAddress   string
+
+	Outputs []TransactionOutput
 }
 
 type StatusCode string

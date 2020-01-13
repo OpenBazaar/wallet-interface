@@ -10,7 +10,7 @@ import (
 	hd "github.com/btcsuite/btcutil/hdkeychain"
 )
 
-// The Wallet interface is used by openbazaar-go for both normal wallet operation (sending
+// Wallet interface is used by openbazaar-go for both normal wallet operation (sending
 // and receiving) as well as for handling multisig escrow payment as part of its order flow.
 // The following is a very high level of the order flow and how it relates to the methods
 // described by this interface.
@@ -50,6 +50,11 @@ type Wallet interface {
 	walletMustBanker
 	walletCanBumpFee
 }
+
+var (
+	// ErrInsufficientFunds is returned when the wallet is unable to send the amount specified due to the balance being too low
+	ErrInsufficientFunds = errors.New("ERROR_INSUFFICIENT_FUNDS")
+)
 
 // WalletMustManuallyAssociateTransactionToOrder MUST be checked for by openbazaar-go to ensure
 // that wallets which require manual association between transactions and orders are properly
@@ -238,7 +243,7 @@ type walletMustBanker interface {
 	// EstimateFee should return the estimate fee that will be required to make a transaction
 	// spending from the given inputs to the given outputs. FeePerByte is denominated in
 	// the coin's base unit (for example: satoshis).
-	EstimateFee(ins []TransactionInput, outs []TransactionOutput, feePerByte uint64) big.Int
+	EstimateFee(ins []TransactionInput, outs []TransactionOutput, feePerByte big.Int) big.Int
 
 	// EstimateSpendFee should return the anticipated fee to transfer a given amount of coins
 	// out of the wallet at the provided fee level. Typically this involves building a
@@ -345,6 +350,5 @@ type Signature struct {
 
 // Errors
 var (
-	ErrorInsuffientFunds error = errors.New("Insuffient funds")
-	ErrorDustAmount      error = errors.New("Amount is below network dust treshold")
+	ErrorDustAmount error = errors.New("amount is below network dust treshold")
 )

@@ -2,6 +2,8 @@ package wallet
 
 import (
 	"bytes"
+	"encoding/json"
+	"math/big"
 	"time"
 
 	"github.com/btcsuite/btcd/btcec"
@@ -22,14 +24,12 @@ const (
 	Zcash                = 133
 	BitcoinCash          = 145
 	Ethereum             = 60
-	Filecoin             = 461
 
 	TestnetBitcoin     = 1000000
 	TestnetLitecoin    = 1000001
 	TestnetZcash       = 1000133
 	TestnetBitcoinCash = 1000145
 	TestnetEthereum    = 1000060
-	TestnetFilecoin    = 1000461
 )
 
 func (c *CoinType) String() string {
@@ -44,8 +44,6 @@ func (c *CoinType) String() string {
 		return "Litecoin"
 	case Ethereum:
 		return "Ethereum"
-	case Filecoin:
-		return "Filecoin"
 	case TestnetBitcoin:
 		return "Testnet Bitcoin"
 	case TestnetBitcoinCash:
@@ -56,8 +54,6 @@ func (c *CoinType) String() string {
 		return "Testnet Litecoin"
 	case TestnetEthereum:
 		return "Testnet Ethereum"
-	case TestnetFilecoin:
-		return "Testnet Filecoin"
 	default:
 		return ""
 	}
@@ -75,8 +71,6 @@ func (c *CoinType) CurrencyCode() string {
 		return "LTC"
 	case Ethereum:
 		return "ETH"
-	case Filecoin:
-		return "FIL"
 	case TestnetBitcoin:
 		return "TBTC"
 	case TestnetBitcoinCash:
@@ -87,8 +81,6 @@ func (c *CoinType) CurrencyCode() string {
 		return "TLTC"
 	case TestnetEthereum:
 		return "TETH"
-	case TestnetFilecoin:
-		return "TFIL"
 	default:
 		return ""
 	}
@@ -129,7 +121,7 @@ type Stxos interface {
 
 type Txns interface {
 	// Put a new transaction to the database
-	Put(raw []byte, txid string, value, height int, timestamp time.Time, watchOnly bool) error
+	Put(raw []byte, txid, value string, height int, timestamp time.Time, watchOnly bool) error
 
 	// Fetch a tx and it's metadata given a hash
 	Get(txid chainhash.Hash) (Txn, error)
@@ -203,7 +195,7 @@ type Utxo struct {
 	AtHeight int32
 
 	// The higher the better
-	Value int64
+	Value string
 
 	// Output script
 	ScriptPubkey []byte
@@ -235,7 +227,7 @@ func (utxo *Utxo) IsEqual(alt *Utxo) bool {
 		return false
 	}
 
-	if bytes.Compare(utxo.ScriptPubkey, alt.ScriptPubkey) != 0 {
+	if !bytes.Equal(utxo.ScriptPubkey, alt.ScriptPubkey) {
 		return false
 	}
 
@@ -278,7 +270,7 @@ type Txn struct {
 	Txid string
 
 	// The value relevant to the wallet
-	Value int64
+	Value string
 
 	// The height at which it was mined
 	Height int32
@@ -324,4 +316,14 @@ const (
 type KeyPath struct {
 	Purpose KeyPurpose
 	Index   int
+}
+
+type CurrencyDefinition struct {
+	Code         string
+	Divisibility int64
+}
+type CurrencyValue struct {
+	Currency           CurrencyDefinition
+	Value              big.Int
+	ValueSerialization json.Number
 }

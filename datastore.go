@@ -134,13 +134,13 @@ type Txns interface {
 	Put(raw []byte, txid, value string, height int, timestamp time.Time, watchOnly bool) error
 
 	// Fetch a tx and it's metadata given a hash
-	Get(txid chainhash.Hash) (Txn, error)
+	Get(txid string) (Txn, error)
 
 	// Fetch all transactions from the db
 	GetAll(includeWatchOnly bool) ([]Txn, error)
 
 	// Update the height of a transaction
-	UpdateHeight(txid chainhash.Hash, height int, timestamp time.Time) error
+	UpdateHeight(txid string, height int, timestamp time.Time) error
 
 	// Delete a transactions from the db
 	Delete(txid *chainhash.Hash) error

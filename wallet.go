@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	btc "github.com/btcsuite/btcutil"
 	hd "github.com/btcsuite/btcutil/hdkeychain"
 )
@@ -46,9 +45,7 @@ import (
 // escrowed payment.
 type Wallet interface {
 	walletMustManager
-	walletMustKeysmither
 	walletMustBanker
-	walletCanBumpFee
 }
 
 var (
@@ -85,7 +82,7 @@ type EscrowWallet interface {
 	// message he calls SweepAddress to move the funds back into his wallet.
 	//
 	// 4) The timeout has expired on a 2 of 3 multisig. The vendor calls SweepAddress to claim the funds.
-	SweepAddress(ins []TransactionInput, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (*chainhash.Hash, error)
+	SweepAddress(ins []TransactionInput, address *btc.Address, key *hd.ExtendedKey, redeemScript *[]byte, feeLevel FeeLevel) (string, error)
 
 	// GenerateMultisigScript should deterministically create a redeem script and address from the information provided.
 	// This method should be strictly limited to taking the input data, combining it to produce the redeem script and
@@ -208,10 +205,10 @@ type walletMustManager interface {
 	Transactions() ([]Txn, error)
 
 	// GetTransaction return info on a specific transaction given the txid.
-	GetTransaction(txid chainhash.Hash) (Txn, error)
+	GetTransaction(txid string) (Txn, error)
 
 	// ChainTip returns the best block hash and height of the blockchain.
-	ChainTip() (uint32, chainhash.Hash)
+	ChainTip() (uint32, string)
 
 	// ReSyncBlockchain is called in response to a user action to rescan transactions. API based
 	// wallets should do another scan of their addresses to find anything missing. Full node, or SPV
@@ -219,7 +216,7 @@ type walletMustManager interface {
 	ReSyncBlockchain(fromTime time.Time)
 
 	// GetConfirmations returns the number of confirmations and the height for a transaction.
-	GetConfirmations(txid chainhash.Hash) (confirms, atHeight uint32, err error)
+	GetConfirmations(txid string) (confirms, atHeight uint32, err error)
 
 	// ChildKey generate a child key using the given chaincode. Each openbazaar-go node
 	// keeps a master key (an hd secp256k1 key) that it uses in multisig transactions.
@@ -256,7 +253,7 @@ type walletMustBanker interface {
 	// be swept to the provided payment address. For most coins this entails subtracting the
 	// transaction fee from the total amount being sent rather than adding it on as is normally
 	// the case when spendAll is false.
-	Spend(amount big.Int, addr btc.Address, feeLevel FeeLevel, referenceID string, spendAll bool) (*chainhash.Hash, error)
+	Spend(amount big.Int, addr btc.Address, feeLevel FeeLevel, referenceID string, spendAll bool) (string, error)
 
 	// EstimateFee should return the estimate fee that will be required to make a transaction
 	// spending from the given inputs to the given outputs. FeePerByte is denominated in
@@ -278,7 +275,7 @@ type walletCanBumpFee interface {
 	// try to get it confirmed and return the txid of the new transaction (if one exists).
 	// Since this method is only called in response to user action, it is acceptable to
 	// return an error if this functionality is not available in this wallet or on the network.
-	BumpFee(txid chainhash.Hash) (*chainhash.Hash, error)
+	BumpFee(txid string) (string, error)
 }
 
 type FeeLevel int

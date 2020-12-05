@@ -136,6 +136,11 @@ type walletMustManager interface {
 	// The returned balances should be in the coin's base unit (for example: satoshis)
 	Balance() (confirmed, unconfirmed CurrencyValue)
 
+	// AddressBalance returns the confirmed and unconfirmed aggregate balance for the address.
+	//
+	// The returned balances should be in the coin's base unit (for example: satoshis)
+	AddressBalance(addr btc.Address) (confirmed, unconfirmed int64)
+
 	// Transactions returns a list of transactions for this wallet.
 	Transactions() ([]Txn, error)
 
